@@ -1,0 +1,11 @@
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ServiceInstance
+metadata:
+  name: standalone-mysql-instance
+  namespace: test-ns
+spec:
+  clusterServiceClassExternalName: p-mysql
+  clusterServicePlanExternalName: 5mb
+  parameters:
+    credentials:
+      param-1: value-1
