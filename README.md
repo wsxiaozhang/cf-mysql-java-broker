@@ -88,22 +88,12 @@ java -jar cf-mysql-java-broker-0.1.0.jar
 
 The default port was 9000, we can use http://<host_ip>:9000/v2/catalog to check if the server was ready.
 
-## Step 3 - Create broker resource
+## Step 3 - Create mysql service broker resource
 
-First config the kube-config to connect service catalog api
-
-```console
-kubectl config set-cluster service-catalog --server=http://$SVC_CAT_API_SERVER_IP:30080
-kubectl config set-context service-catalog --cluster=service-catalog
-```
-
-SVC\_CAT\_API\_SERVER\_IP: The IP Address of the catalog-api service if you were using ClusterIP or the IP address of the Node if you were using NodePort
-
-
-Then create the service broker:
+A MySQL service broker resource must be created first. The service broker resource will be registered to Kubernetes service catalog automatically after that.
 
 ```console
-kubectl --context=service-catalog create -f mysql-broker.yaml
+kubectl create -f mysql-broker.yaml
 
 ```
 
@@ -111,187 +101,238 @@ Check the broker status
 
 
 ```console
-root@hchenk8s1:~# kubectl --context=service-catalog get broker -o yaml
-apiVersion: servicecatalog.k8s.io/v1alpha1
-kind: Broker
+kubectl get clusterservicebroker standalone-mysql-broker -o yaml
+
+Sample output looks like:
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ClusterServiceBroker
 metadata:
-  creationTimestamp: 2017-04-12T05:12:31Z
+  creationTimestamp: 2017-11-06T09:20:38Z
   finalizers:
-  - kubernetes
-  name: mysql-broker
-  resourceVersion: "424"
-  selfLink: /apis/servicecatalog.k8s.io/v1alpha1/brokersmysql-broker
-  uid: a14c47cb-1f3e-11e7-a0b9-b6ef720f6067
+  - kubernetes-incubator/service-catalog
+  generation: 1
+  name: standalone-mysql-broker
+  resourceVersion: "411"
+  selfLink: /apis/servicecatalog.k8s.io/v1beta1/clusterservicebrokers/standalone-mysql-broker
+  uid: c0e07ae0-c2d3-11e7-b157-0a58ac100508
 spec:
-  url: http://9.111.254.218:9000
+  relistBehavior: Duration
+  relistDuration: 15m0s
+  relistRequests: 0
+  url: http://192.168.199.78:9000
 status:
   conditions:
-  - message: Successfully fetched catalog from broker.
+  - lastTransitionTime: 2017-11-07T09:20:39Z
+    message: Successfully fetched catalog entries from broker.
     reason: FetchedCatalog
     status: "True"
     type: Ready
+  reconciledGeneration: 1
 ```
 
-After broker resource created, the connection between service catalog and broker server will be created.
+After service broker resource created, the connection between service catalog and broker server will be created.
 
 
-## Step 4 - Check the catalog
+## Step 4 - Check the service classes in service catalog
 
-Check the service catalog:
-
-```console
-root@hchenk8s1:~# kubectl --context=service-catalog get serviceclass -o yaml
-apiVersion: servicecatalog.k8s.io/v1alpha1
-bindable: false
-brokerName: mysql-broker
-description: MySQL service for application development and testing
-kind: ServiceClass
-metadata:
-  creationTimestamp: 2017-04-12T05:12:31Z
-  name: p-mysql
-  resourceVersion: "35"
-  selfLink: /apis/servicecatalog.k8s.io/v1alpha1/serviceclassesp-mysql
-  uid: a17649ae-1f3e-11e7-a0b9-b6ef720f6067
-osbGuid: 3101b971-1044-4816-a7ac-9ded2e028079
-osbMetadata:
-  listing:
-    blurb: MySQL service for application development and testing
-    imageUrl: null
-  provider:
-    name: null
-osbTags:
-- mysql
-- relational
-planUpdatable: false
-plans:
-- description: Shared MySQL Server, 5mb persistent disk, 40 max concurrent connections
-  name: 5mb
-  osbFree: false
-  osbGuid: 2451fa22-df16-4c10-ba6e-1f682d3dcdc9
-  osbMetadata:
-    bullets:
-    - content: Shared MySQL server
-    - content: 5 MB storage
-    - content: 40 concurrent connections
-    cost: 0
-```
-
-## Step 5 - Create Instance
+In service catalog, check the new added service classes offered by mysql service broker:
 
 ```console
-kubectl --context=service-catalog create -f mysql-instance.yaml
-```
+kubectl get clusterserviceclasses -o yaml
 
-And Check the instance status after creataion.
+Sample output looks like:
 
-```console
-root@hchenk8s1:~# kubeca get instance --namespace=hchentest
-NAME             KIND
-mysql-instance   Instance.v1alpha1.servicecatalog.k8s.io
-root@hchenk8s1:~# kubeca get instance --namespace=hchentest -o yaml
 apiVersion: v1
 items:
-- apiVersion: servicecatalog.k8s.io/v1alpha1
-  kind: Instance
+- apiVersion: servicecatalog.k8s.io/v1beta1
+  kind: ClusterServiceClass
   metadata:
-    creationTimestamp: 2017-04-07T14:48:29Z
-    finalizers:
-    - kubernetes
-    name: mysql-instance
-    namespace: hchentest
-    resourceVersion: "408"
-    selfLink: /apis/servicecatalog.k8s.io/v1alpha1/namespaces/hchentest/instances/mysql-instance
-    uid: 43a08214-1ba1-11e7-9917-4a6adf82f80b
+    creationTimestamp: 2017-11-06T09:20:38Z
+    name: 3101b971-1044-4816-a7ac-9ded2e028079
+    namespace: ""
+    resourceVersion: "154"
+    selfLink: /apis/servicecatalog.k8s.io/v1beta1/clusterserviceclasses/3101b971-1044-4816-a7ac-9ded2e028079
+    uid: c0fe568d-c2d3-11e7-b157-0a58ac100508
   spec:
-    checksum: 6e79e8643d9382239a666b44b9948e65789b72e0dc12ad3fc23cfc47b6cfc425
-    osbGuid: 2df17f6c-6b5a-44bb-8492-64899c7b2541
-    planName: 5mb
-    serviceClassName: p-mysql
+    bindable: true
+    clusterServiceBrokerName: standalone-mysql-broker
+    description: MySQL service for application development and testing
+    externalID: 3101b971-1044-4816-a7ac-9ded2e028079
+    externalMetadata:
+      listing:
+        blurb: MySQL service for application development and testing
+        imageUrl: null
+      provider:
+        name: null
+    externalName: p-mysql
+    planUpdatable: false
+    tags:
+    - mysql
+    - relational
   status:
-    conditions:
-    - message: The instance was provisioned successfully
-      reason: ProvisionedSuccessfully
-      status: "True"
-      type: Ready
-kind: List
-metadata: {}
-resourceVersion: ""
-selfLink: ""
+    removedFromBrokerCatalog: false
 ```
 
-Create Instance will send PUT request to broker server and broker server will handle to create the database with cf name perfix in mysql db
-
-## Step 6 - Binding Instance
-
-Then Create the mysql binding.
+## Step 5 - Create namespace for service instance isolation
+In kubernetes, `namespaces` are used to isolate different users' resources from others. For service broker, users can create service instances in their own namespace, so that others can not touch it without authorization of that namespace.
 
 ```console
-kubectl --context=service-catalog create -f mysql-binding.yaml
+kubectl create namespace test-ns
+```
+
+## Step 6 - Create Mysql Service Instance
+
+```console
+kubectl create -f mysql-instance.yaml
+```
+Note: Assign service instance in specific namespace by updating the yaml file. Otherwise, the instance will be exposed to default namespace.
+
+Check the instance status after creataion.
+
+```console
+kubectl get serviceinstance standalone-mysql-instance -n test-ns -o yaml
+
+Sample output looks like:
+
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ServiceInstance
+metadata:
+  creationTimestamp: 2017-11-06T09:51:36Z
+  finalizers:
+  - kubernetes-incubator/service-catalog
+  generation: 1
+  name: standalone-mysql-instance
+  namespace: test-ns
+  resourceVersion: "68"
+  selfLink: /apis/servicecatalog.k8s.io/v1beta1/namespaces/test-ns/serviceinstances/standalone-mysql-instance
+  uid: 1442ca94-c2d8-11e7-b157-0a58ac100508
+spec:
+  clusterServiceClassExternalName: p-mysql
+  clusterServiceClassRef:
+    name: 3101b971-1044-4816-a7ac-9ded2e028079
+  clusterServicePlanExternalName: 5mb
+  clusterServicePlanRef:
+    name: 2451fa22-df16-4c10-ba6e-1f682d3dcdc9
+  externalID: f9ecf74e-0712-4f04-a4d5-d84eb6de0ea5
+  parameters:
+    credentials:
+      param-1: value-1
+  updateRequests: 0
+status:
+  asyncOpInProgress: false
+  conditions:
+  - lastTransitionTime: 2017-11-06T09:51:36Z
+    message: The instance was provisioned successfully
+    reason: ProvisionedSuccessfully
+    status: "True"
+    type: Ready
+  deprovisionStatus: Required
+  externalProperties:
+    clusterServicePlanExternalName: 5mb
+    parameterChecksum: e6f89e73eff47fec7606886dbe0ffe5d61a7ee529af03b7fc17041ae27d7580d
+    parameters:
+      credentials:
+        param-1: value-1
+  orphanMitigationInProgress: false
+  reconciledGeneration: 1
+```
+
+Create Instance will send PUT request to service broker server and broker server will handle to create the database with cf name perfix in mysql server.
+
+## Step 7 - Binding Service Instance
+
+Then Create a mysql service binding, which is used by application to connect to mysql service instance .
+Note: Like service instance, service binding can also be assigned in specific namespace by updating its yaml file. Otherwise, the binding will be exposed to default namespace.
+```console
+kubectl create -f mysql-binding.yaml
 ```
 
 Check the binding status
 
 ```console
-root@hchenk8s1:~# kubeca get binding --namespace=hchentest
-NAME            KIND
-mysql-binding   Binding.v1alpha1.servicecatalog.k8s.io
-root@hchenk8s1:~# kubeca get binding --namespace=hchentest -o yaml
-apiVersion: v1
-items:
-- apiVersion: servicecatalog.k8s.io/v1alpha1
-  kind: Binding
-  metadata:
-    creationTimestamp: 2017-04-07T09:56:37Z
-    deletionGracePeriodSeconds: 0
-    deletionTimestamp: 2017-04-07T10:14:02Z
-    finalizers:
-    - kubernetes
-    name: mysql-binding
-    namespace: hchentest
-    resourceVersion: "409"
-    selfLink: /apis/servicecatalog.k8s.io/v1alpha1/namespaces/hchentest/bindings/mysql-binding
-    uid: 7dd163e1-1b78-11e7-9917-4a6adf82f80b
-  spec:
-    checksum: b6119b55a57267347ab7dec8cadf86aee68a1261ed381e8c6b75f1790ff671a1
-    instanceRef:
-      name: mysql-instance
-    osbGuid: 078a417e-4492-4091-b9c4-f41d0aeffd54
-    secretName: mysql-secret
-  status:
-    conditions:
-    - message: Injected bind result
-      reason: InjectedBindResult
-      status: "True"
-      type: Readykind: List
-metadata: {}
-resourceVersion: ""
-selfLink: ""
+kubectl get servicebindings -n test-ns
+
+Sample output looks like:
+NAME                        AGE
+standalone-mysql-binding    1d
+```
+
+```console
+kubectl get servicebinding standalone-mysql-binding8 -n test-ns -o yaml
+
+Sample output looks like:
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ServiceBinding
+metadata:
+  creationTimestamp: 2017-11-07T09:21:13Z
+  finalizers:
+  - kubernetes-incubator/service-catalog
+  generation: 1
+  name: standalone-mysql-binding
+  namespace: test-ns
+  resourceVersion: "414"
+  selfLink: /apis/servicecatalog.k8s.io/v1beta1/namespaces/test-ns/servicebindings/standalone-mysql-binding
+  uid: ffefb63b-c39c-11e7-9323-0a58ac100508
+spec:
+  externalID: 92e81144-8b24-4760-8863-797155a0368a
+  instanceRef:
+    name: standalone-mysql-instance
+  secretName: mysql-secret
+status:
+  conditions:
+  - lastTransitionTime: 2017-11-07T09:21:13Z
+    message: Injected bind result
+    reason: InjectedBindResult
+    status: "True"
+    type: Ready
+  externalProperties: {}
+  orphanMitigationInProgress: false
+  reconciledGeneration: 1
 ```
 
 Bind Instance will send PUT request to broker server and broker server will create the username and password and grant the privileged for the db user and return the credentials to service catalog which used to create the kubernetes secret.
 
 So After the binging success, the kubernetes secret will be created.
 
-## Step 7 - Check the secret
+## Step 8 - Check the generated secret
 
-After the binding success, the kubernetes secret will be created under namespaces.
+After the binding success, the kubernetes secret will be created under the same namespaces as service binding. Secret is the more eligent and secure way to transfer credential information. Please refer to kubernetes doc to learn how to config and use Secret.
 
 ```console
-root@hchenk8s1:~# kubectl get secret -o yaml mysql-secret
+kubectl get secret -n test-ns
+
+Sample output looks like:
+
+NAME                  TYPE                                  DATA      AGE
+mysql-secret          Opaque                                4         1d
+
+get secret mysql-secret -n test-ns -o yaml
+
+Sample output looks like:
+
 apiVersion: v1
 data:
-  database: Y2ZfNDBkYTdjMjRfMjc5NV80YmI3X2FhZWVfNDdmNzRkNTY0ZjM2
-  password: ZjFmZjE1NDAtZTNkNi00OWQ3LTk5OTctODgwMzQyOTc0YWU1
-  username: MjRjNGMzMjdlNWE3NGYwZA==
+  database: Y2ZfZjllY2Y3NGVfMDcxMl80ZjA0X2E0ZDVfZDg0ZWI2ZGUwZWE1
+  password: ZjQxZTBjYzktYzI3Mi00NDg1LWJiNjEtNmEzYzEzODk2ZDc3
+  uri: bXlzcWw6Ly9sb2NhbGhvc3QvdGVzdA==
+  username: N2E0ODY2NGQ0OWM5ZWQ5NQ==
 kind: Secret
 metadata:
-  creationTimestamp: 2017-04-13T01:54:31Z
+  creationTimestamp: 2017-11-07T09:21:13Z
   name: mysql-secret
-  namespace: default
-  resourceVersion: "784356"
-  selfLink: /api/v1/namespaces/default/secrets/mysql-secret
-  uid: 22cfff41-1fec-11e7-9b2b-3aab550ec08b
+  namespace: test-ns
+  ownerReferences:
+  - apiVersion: servicecatalog.k8s.io/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: ServiceBinding
+    name: standalone-mysql-binding
+    uid: ffefb63b-c39c-11e7-9323-0a58ac100508
+  resourceVersion: "1552248"
+  selfLink: /api/v1/namespaces/test-ns/secrets/mysql-secret8
+  uid: 0034bfcb-c39d-11e7-b848-00163e0abefa
 type: Opaque
+
 ```
 
 ## Step 8 - Using the Secret
