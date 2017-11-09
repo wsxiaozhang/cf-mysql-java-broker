@@ -245,7 +245,9 @@ Then Create a mysql service binding, which is used by application to connect to 
 Note: 
 1. Like service instance, service binding can also be assigned in specific namespace by updating its yaml file. Otherwise, the binding will be exposed to default namespace.
 2. To simplify the demo, update mysql password validation policy to low level to accept password only with length validation. Connect to mysql, and execute 
+```console
 mysql> set global validate_password_policy=0;
+```
 
 ```console
 kubectl create -f demo/standaloneMySQLSBinding.yaml
