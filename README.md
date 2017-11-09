@@ -93,7 +93,7 @@ The default port was 9000, we can use http://<host_ip>:9000/v2/catalog to check 
 A MySQL service broker resource must be created first. The service broker resource will be registered to Kubernetes service catalog automatically after that.
 
 ```console
-kubectl create -f mysql-broker.yaml
+kubectl create -f demo/standaloneMySQLSB.yaml
 
 ```
 
@@ -183,7 +183,7 @@ kubectl create namespace test-ns
 ## Step 6 - Create Mysql Service Instance
 
 ```console
-kubectl create -f mysql-instance.yaml
+kubectl create -f demo/standaloneMySQLSI.yaml
 ```
 Note: Assign service instance in specific namespace by updating the yaml file. Otherwise, the instance will be exposed to default namespace.
 
@@ -242,9 +242,13 @@ Create Instance will send PUT request to service broker server and broker server
 ## Step 7 - Binding Service Instance
 
 Then Create a mysql service binding, which is used by application to connect to mysql service instance .
-Note: Like service instance, service binding can also be assigned in specific namespace by updating its yaml file. Otherwise, the binding will be exposed to default namespace.
+Note: 
+1. Like service instance, service binding can also be assigned in specific namespace by updating its yaml file. Otherwise, the binding will be exposed to default namespace.
+2. To simplify the demo, update mysql password validation policy to low level to accept password only with length validation. Connect to mysql, and execute 
+mysql> set global validate_password_policy=0;
+
 ```console
-kubectl create -f mysql-binding.yaml
+kubectl create -f demo/standaloneMySQLSBinding.yaml
 ```
 
 Check the binding status
@@ -337,21 +341,21 @@ type: Opaque
 
 ## Step 8 - Using the Secret
 
-Prepare test pod yaml file:
+Prepare test pod yaml file like demo/usemysql.yaml:
 
 ```console
 {
  "apiVersion": "v1",
  "kind": "Pod",
   "metadata": {
-    "name": "mypod",
-    "namespace": "default"
+    "name": "usemysqlpod",
+    "namespace": "test-ns"
   },
   "spec": {
-    "hostNetworl": true,
+    "hostNetwork": true,
     "containers": [{
-      "name": "mypod",
-      "image": "mysql:5.6",
+      "name": "usemysqlpod",
+      "image": "mysql:5.7",
       "volumeMounts": [{
         "name": "foo",
         "mountPath": "/etc/foo",
@@ -373,11 +377,15 @@ Prepare test pod yaml file:
 Create the pod resource
 
 ```console
-kubectl exec -it mypod
-root@hchenk8s1:~# kubectl get pods
+kubectl exec -it usemysqlpod
+kubectl get pods
+
+Sample output looks like:
+
 NAME      READY     STATUS    RESTARTS   AGE
-mypod     1/1       Running   0          1m
-root@hchenk8s1:~# kubectl exec -it mypod bash
+usemysqlpod     1/1       Running   0          1m
+
+root@hchenk8s1:~# kubectl exec -it usemysqlpod bash
 root@mypod:/# cat /etc/foo/database
 cf_93a4eef9_5893_4198_a822_44f4eac0ae3f
 root@mypod:/# cat /etc/foo/username
@@ -389,19 +397,7 @@ root@mypod:/# cat /etc/foo/password
 Then use mysql client to try to connect
 
 ```console
-mysql -ua9d8618ed37a38ea -p07c5e9a5-bd12-4bac-b6be-6f651903ba5f -Dcf_93a4eef9_5893_4198_a822_44f4eac0ae3f -h9.111.254.218
-Warning: Using a password on the command line interface can be insecure.
-Welcome to the MySQL monitor.  Commands end with ; or \g.
-Your MySQL connection id is 4
-Server version: 5.7.11-0ubuntu6 (Ubuntu)
-
-Copyright (c) 2000, 2017, Oracle and/or its affiliates. All rights reserved.
-
-Oracle is a registered trademark of Oracle Corporation and/or its
-affiliates. Other names may be trademarks of their respective
-owners.
-
-Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+mysql -ua9d8618ed37a38ea -p07c5e9a5-bd12-4bac-b6be-6f651903ba5f
 
 mysql> show databases;
 +-----------------------------------------+
