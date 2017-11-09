@@ -49,7 +49,7 @@ class ServiceBindingService implements EnvironmentAware {
 class ServiceBinding {
   String host, database, username, password, uri, jdbc_url
   int port
-
+  def credentials = [:]
   ServiceBinding(String id, ServiceInstance instance, Environment environment) {
     MessageDigest digest = MessageDigest.getInstance("MD5")
     digest.update(id.bytes);
@@ -60,5 +60,10 @@ class ServiceBinding {
     this.jdbc_url = environment.getProperty('spring.datasource.url')
     this.uri = this.jdbc_url.substring(5)
     this.database = instance.database
+    this.credentials.put('username', this.username)
+    this.credentials.put('password', this.password)
+    this.credentials.put('uri', this.uri)
+    this.credentials.put('database', this.database)
+   
   }
 }
