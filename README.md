@@ -38,46 +38,26 @@ Routes
 Register the MySQL Service Broker in Kubernetes Service Catalog
 ===============================================================
 
-# Service Catalog in CFC
+# Service Catalog in Kubernetes
 
-This document outlines the basic features of the service catalog by walking
-through a short demo.
+This document outlines the basic steps to register mysql service broker to Kubernetes service catalog by walking
+through a short demo. 
 
 ## Step 0 - Prerequisites
 
 ### environment requirement
 
-1. kubernetes 1.6.1 +
+1. kubernetes 1.7 +
+2. helm / tiller 2.7.0 +
 
 
 ## Step 1 - Installing the Service Catalog System
 
-Get the tar file [service-catalog](https://github.com/hchenxa/daily_work/blob/master/kubernetes/service-catalog/catalog-0.0.1.tgz) and use helm to deploy the service catalog system
+Please refer to Kubernetes service catalog installation document [service-catalog](https://github.com/kubernetes-incubator/service-catalog/blob/master/docs/install.md) 
+There is also a workthrough document of registering a dummy service broker to Kubernetes service catalog. Go through it to understand and verify how K8S service catalog works. [walkthrough](https://github.com/kubernetes-incubator/service-catalog/blob/master/docs/walkthrough.md) 
 
-```console
-helm install catalog-0.0.1.tgz --name catalog
-```
-
-And the catalog will be created as kubernetes deployment.
-
-```console
-root@hchenk8s1:~# kc get deployment --all-namespaces
-
-NAMESPACE     NAME                                 DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
-kube-system   catalog-catalog-apiserver            1         1         1            1           1d
-kube-system   catalog-catalog-controller-manager   1         1         1            1           1d
-```
-
-And also the deployment will be expose as the service
-```console
-root@hchenk8s1:~# kc get service --all-namespaces | grep cata
-kube-system   catalog-catalog-apiserver   10.0.0.149   <nodes>       80:30080/TCP,443:30443/TCP       1d
-```
-
-## Step 2 - Setup MySQL broker server
+## Step 2 - Setup MySQL service broker 
 Environment requirement: Need java installed.
-
-and the source code was here: https://github.com/hchenxa/cf-mysql-java-broker
 
 1.First setup the mysql server.
 
@@ -93,16 +73,14 @@ root@hchenk8s7:~# cat /etc/mysql/mysql.conf.d/mysqld.cnf | grep bind
 #bind-address		= 127.0.0.1
 ```
 
-and the mysql root password must be **root**
+and the mysql root password must be **=[-P0o9i8**
 
 And need to create a database named **test** by CREATE DATABASE test;
 
 
-2.Startup the broker server
+2.Startup the service broker
 
-Get the JAR file [mysql-broker](https://github.com/hchenxa/daily_work/blob/master/kubernetes/service-catalog/cf-mysql-java-broker-0.1.0.jar)
-
-and execute
+Compile service broker server or find one in 'pre-build' folder and execute
 
 ```console
 java -jar cf-mysql-java-broker-0.1.0.jar
