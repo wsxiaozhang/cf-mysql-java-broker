@@ -11,6 +11,7 @@ services:
     - mysql
     - relational
   max_db_per_node: 250
+  bindable: true
   metadata:
     provider:
       name:
