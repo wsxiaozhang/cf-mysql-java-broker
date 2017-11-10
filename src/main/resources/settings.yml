@@ -4,7 +4,7 @@
 
 
 services:
-- name: p-mysql
+- name: my-mysql
   id: 3101b971-1044-4816-a7ac-123456789012
   description: MySQL service for application development and testing
   tags:
