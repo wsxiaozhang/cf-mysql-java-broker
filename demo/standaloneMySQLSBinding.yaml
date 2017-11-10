@@ -1,9 +1,9 @@
 apiVersion: servicecatalog.k8s.io/v1beta1
 kind: ServiceBinding
 metadata:
-  name: standalone-mysql-binding8
+  name: standalone-mysql-binding
   namespace: test-ns 
 spec:
   instanceRef:
     name: standalone-mysql-instance
-  secretName: mysql-secret8
+  secretName: mysql-secret
