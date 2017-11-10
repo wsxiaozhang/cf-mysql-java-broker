@@ -21,7 +21,7 @@
     "volumes": [{
       "name": "foo",
       "secret": {
-        "secretName": "mysql-secret8"
+        "secretName": "mysql-secret"
       }
     }]
   }
