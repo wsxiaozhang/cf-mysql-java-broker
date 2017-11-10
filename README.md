@@ -380,27 +380,28 @@ Create the pod resource
 
 ```console
 [root@~]# kubectl create -f demo/usemysql.yaml
-[root@~]# kubectl exec -it usemysqlpod
-[root@~]# kubectl get pods
+[root@~]# kubectl get pods --namespace test-ns
 
 Sample output looks like:
 
 NAME      READY     STATUS    RESTARTS   AGE
 usemysqlpod     1/1       Running   0          1m
 
-[root@~]# kubectl exec -it usemysqlpod bash
+[root@~]# kubectl exec -it usemysqlpod bash --namespace test-ns
 root@usemysqlpod:/# cat /etc/foo/database
 cf_93a4eef9_5893_4198_a822_44f4eac0ae3f
 root@usemysqlpod:/# cat /etc/foo/username
 a9d8618ed37a38ea
 root@usemysqlpod:/# cat /etc/foo/password
 07c5e9a5-bd12-4bac-b6be-6f651903ba5f
+root@usemysqlpod:/# cat /etc/foo/uri
+mysql://192.168.199.78
 ```
 
 Then use mysql client to try to connect
 
 ```console
-mysql -ua9d8618ed37a38ea -p07c5e9a5-bd12-4bac-b6be-6f651903ba5f
+mysql -ua9d8618ed37a38ea -p07c5e9a5-bd12-4bac-b6be-6f651903ba5f -h 192.168.199.78
 
 mysql> show databases;
 +-----------------------------------------+
