@@ -8,6 +8,6 @@ image:
   pullPolicy: Always
 service:
   name: mysql-java-broker
-  type: ClusterIP
+  type: NodePort 
   externalPort: 80
   internalPort: 9000

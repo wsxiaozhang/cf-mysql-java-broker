@@ -1,6 +1,6 @@
 apiVersion: servicecatalog.k8s.io/v1beta1
 kind: ClusterServiceBroker
 metadata:
-  name: standalone-mysql-broker
+  name: k8s-mysql-java-broker
 spec:
   url: http://mysql-java-broker-mysql-java-broker.mysql-java-broker.svc.cluster.local
