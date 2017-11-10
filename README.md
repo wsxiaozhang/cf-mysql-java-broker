@@ -62,13 +62,13 @@ Environment requirement: Need java installed.
 1.First setup the mysql server.
 
 ```console
-apt install mysql-server
+[root@~]# apt install mysql-server
 ```
 
 comment the bind-address in mysql config file:
 
 ```console
-root@hchenk8s7:~# cat /etc/mysql/mysql.conf.d/mysqld.cnf | grep bind
+[root@~]# cat /etc/mysql/mysql.conf.d/mysqld.cnf | grep bind
 
 #bind-address		= 127.0.0.1
 ```
@@ -83,7 +83,7 @@ And need to create a database named **test** by CREATE DATABASE test;
 Compile service broker server or find one in 'pre-build' folder and execute
 
 ```console
-java -jar cf-mysql-java-broker-0.1.0.jar
+[root@~]# java -jar cf-mysql-java-broker-0.1.0.jar
 ```
 
 The default port was 9000, we can use http://<host_ip>:9000/v2/catalog to check if the server was ready.
@@ -93,7 +93,7 @@ The default port was 9000, we can use http://<host_ip>:9000/v2/catalog to check 
 A MySQL service broker resource must be created first. The service broker resource will be registered to Kubernetes service catalog automatically after that.
 
 ```console
-kubectl create -f demo/standaloneMySQLSB.yaml
+[root@~]# kubectl create -f demo/standaloneMySQLSB.yaml
 
 ```
 
@@ -101,7 +101,7 @@ Check the broker status
 
 
 ```console
-kubectl get clusterservicebroker standalone-mysql-broker -o yaml
+[root@~]# kubectl get clusterservicebroker standalone-mysql-broker -o yaml
 
 Sample output looks like:
 apiVersion: servicecatalog.k8s.io/v1beta1
@@ -138,7 +138,7 @@ After service broker resource created, the connection between service catalog an
 In service catalog, check the new added service classes offered by mysql service broker:
 
 ```console
-kubectl get clusterserviceclasses -o yaml
+[root@~]# kubectl get clusterserviceclasses -o yaml
 
 Sample output looks like:
 
@@ -177,20 +177,20 @@ items:
 In kubernetes, `namespaces` are used to isolate different users' resources from others. For service broker, users can create service instances in their own namespace, so that others can not touch it without authorization of that namespace.
 
 ```console
-kubectl create namespace test-ns
+[root@~]# kubectl create namespace test-ns
 ```
 
 ## Step 6 - Create Mysql Service Instance
 
 ```console
-kubectl create -f demo/standaloneMySQLSI.yaml
+[root@~]# kubectl create -f demo/standaloneMySQLSI.yaml
 ```
 Note: Assign service instance in specific namespace by updating the yaml file. Otherwise, the instance will be exposed to default namespace.
 
 Check the instance status after creataion.
 
 ```console
-kubectl get serviceinstance standalone-mysql-instance -n test-ns -o yaml
+[root@~]# kubectl get serviceinstance standalone-mysql-instance -n test-ns -o yaml
 
 Sample output looks like:
 
@@ -245,16 +245,18 @@ Then Create a mysql service binding, which is used by application to connect to 
 Note: 
 1. Like service instance, service binding can also be assigned in specific namespace by updating its yaml file. Otherwise, the binding will be exposed to default namespace.
 2. To simplify the demo, update mysql password validation policy to low level to accept password only with length validation. Connect to mysql, and execute 
+```console
 mysql> set global validate_password_policy=0;
+```
 
 ```console
-kubectl create -f demo/standaloneMySQLSBinding.yaml
+[root@~]# kubectl create -f demo/standaloneMySQLSBinding.yaml
 ```
 
 Check the binding status
 
 ```console
-kubectl get servicebindings -n test-ns
+[root@~]# kubectl get servicebindings -n test-ns
 
 Sample output looks like:
 NAME                        AGE
@@ -262,7 +264,7 @@ standalone-mysql-binding    1d
 ```
 
 ```console
-kubectl get servicebinding standalone-mysql-binding8 -n test-ns -o yaml
+[root@~]# kubectl get servicebinding standalone-mysql-binding8 -n test-ns -o yaml
 
 Sample output looks like:
 apiVersion: servicecatalog.k8s.io/v1beta1
@@ -303,14 +305,14 @@ So After the binging success, the kubernetes secret will be created.
 After the binding success, the kubernetes secret will be created under the same namespaces as service binding. Secret is the more eligent and secure way to transfer credential information. Please refer to kubernetes doc to learn how to config and use Secret.
 
 ```console
-kubectl get secret -n test-ns
+[root@~]# kubectl get secret -n test-ns
 
 Sample output looks like:
 
 NAME                  TYPE                                  DATA      AGE
 mysql-secret          Opaque                                4         1d
 
-get secret mysql-secret -n test-ns -o yaml
+[root@~]# kubectl get secret mysql-secret -n test-ns -o yaml
 
 Sample output looks like:
 
@@ -377,20 +379,20 @@ Prepare test pod yaml file like demo/usemysql.yaml:
 Create the pod resource
 
 ```console
-kubectl exec -it usemysqlpod
-kubectl get pods
+[root@~]# kubectl exec -it usemysqlpod
+[root@~]# kubectl get pods
 
 Sample output looks like:
 
 NAME      READY     STATUS    RESTARTS   AGE
 usemysqlpod     1/1       Running   0          1m
 
-root@hchenk8s1:~# kubectl exec -it usemysqlpod bash
-root@mypod:/# cat /etc/foo/database
+[root@~]# kubectl exec -it usemysqlpod bash
+root@usemysqlpod:/# cat /etc/foo/database
 cf_93a4eef9_5893_4198_a822_44f4eac0ae3f
-root@mypod:/# cat /etc/foo/username
+root@usemysqlpod:/# cat /etc/foo/username
 a9d8618ed37a38ea
-root@mypod:/# cat /etc/foo/password
+root@usemysqlpod:/# cat /etc/foo/password
 07c5e9a5-bd12-4bac-b6be-6f651903ba5f
 ```
 
