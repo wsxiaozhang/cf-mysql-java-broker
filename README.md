@@ -343,7 +343,7 @@ type: Opaque
 
 ## Step 8 - Using the Secret
 
-Prepare test pod yaml file like demo/usemysql.yaml:
+Prepare test pod yaml file like `demo/usemysql.yaml`:
 
 ```console
 {
@@ -379,6 +379,7 @@ Prepare test pod yaml file like demo/usemysql.yaml:
 Create the pod resource
 
 ```console
+[root@~]# kubectl create -f demo/usemysql.yaml
 [root@~]# kubectl exec -it usemysqlpod
 [root@~]# kubectl get pods
 
