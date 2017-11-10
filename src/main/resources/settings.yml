@@ -5,7 +5,7 @@
 
 services:
 - name: p-mysql
-  id: 3101b971-1044-4816-a7ac-9ded2e028079
+  id: 3101b971-1044-4816-a7ac-123456789012
   description: MySQL service for application development and testing
   tags:
     - mysql
@@ -20,7 +20,7 @@ services:
       blurb: MySQL service for application development and testing
   plans:
   - name: 5mb
-    id: 2451fa22-df16-4c10-ba6e-1f682d3dcdc9
+    id: 2451fa22-df16-4c10-ba6e-123456789012
     description: Shared MySQL Server, 5mb persistent disk, 40 max concurrent connections
     max_storage_mb: 5 # in MB
     metadata:
