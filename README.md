@@ -59,7 +59,7 @@ There is also a workthrough document of registering a dummy service broker to Ku
 ## Step 2 - Setup MySQL service broker 
 Environment requirement: Need java installed.
 
-1.First setup the mysql server.
+1. First setup the mysql server.
 
 ```console
 [root@~]# apt install mysql-server
@@ -78,15 +78,33 @@ and the mysql root password must be **=[-P0o9i8**
 And need to create a database named **test** by CREATE DATABASE test;
 
 
-2.Startup the service broker
+2. Startup the service broker
 
-Compile service broker server or find one in 'pre-build' folder and execute
+The mysql-java-broker server is flexible to startup in differnent ways according to user's scenarios. It can be started and run as a standalone server, or be deployed to and run in Kubernetes cluster just like a ordinary service. 
+
+2.1 Compile service broker server or find an existed one in 'pre-build' folder and execute
 
 ```console
+[root@~]# ./gradelw build
+[root@~]# cd build/libs
 [root@~]# java -jar cf-mysql-java-broker-0.1.0.jar
 ```
 
 The default port was 9000, we can use http://<host_ip>:9000/v2/catalog to check if the server was ready.
+
+2.2 Deploy service broker in Kubernetes as a service
+
+Please refer to [mysql-java-broker charts] (https://github.com/wsxiaozhang/cf-mysql-java-broker/tree/master/charts/mysql-java-broker) for deployment approach.
+After the broker running in Kubernetes, it can be cluster internally accessed via service url like http://mysql-java-broker-mysql-java-broker.mysql-java-broker.svc.cluster.local. Actually, a clusterservicebroker object will be created to connect the broker at the time of registering to service catalog. The clusterservicebroker object artifact looks like below.
+
+```
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ClusterServiceBroker
+metadata:
+  name: k8s-mysql-java-broker
+spec:
+  url: http://mysql-java-broker-mysql-java-broker.mysql-java-broker.svc.cluster.local
+```
 
 ## Step 3 - Create mysql service broker resource
 
