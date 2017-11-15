@@ -54,6 +54,9 @@ through a short demo.
 ## Step 1 - Installing the Service Catalog System
 
 Please refer to Kubernetes service catalog installation document [service-catalog](https://github.com/kubernetes-incubator/service-catalog/blob/master/docs/install.md) 
+
+NOTE: when ```helm install``` service catalog by using its charts artifact, the "port 30443 already been taken" error probably is met. That maybe because the port has been used by kube-proxy process. In that case, please change to use another port like 31443, for service catalog api server's service nodePort. It can be configured under charts/catalog/values.yaml, if using [service-catalog charts](https://github.com/kubernetes-incubator/service-catalog/blob/master/charts) 
+
 There is also a workthrough document of registering a dummy service broker to Kubernetes service catalog. Go through it to understand and verify how K8S service catalog works. [walkthrough](https://github.com/kubernetes-incubator/service-catalog/blob/master/docs/walkthrough.md) 
 
 ## Step 2 - Setup MySQL service broker 
