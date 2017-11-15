@@ -84,6 +84,8 @@ The mysql-java-broker server is flexible to startup in differnent ways according
 
 2.1 Compile service broker server or find an existed one in 'pre-build' folder and execute
 
+[architecture of running standalone service broker](https://github.com/wsxiaozhang/cf-mysql-java-broker/blob/master/run%20service%20broker%20in%20k8s.png)
+
 ```console
 [root@~]# ./gradelw build
 [root@~]# cd build/libs
@@ -94,8 +96,10 @@ The default port was 9000, we can use http://<host_ip>:9000/v2/catalog to check 
 
 2.2 Deploy service broker in Kubernetes as a service
 
-Please refer to [mysql-java-broker charts] (https://github.com/wsxiaozhang/cf-mysql-java-broker/tree/master/charts/mysql-java-broker) for deployment approach.
-After the broker running in Kubernetes, it can be cluster internally accessed via service url like http://mysql-java-broker-mysql-java-broker.mysql-java-broker.svc.cluster.local. Actually, a clusterservicebroker object will be created to connect the broker at the time of registering to service catalog. The clusterservicebroker object artifact looks like below.
+[architecture of running service broker in Kubernetes](https://github.com/wsxiaozhang/cf-mysql-java-broker/blob/master/run%20service%20broker%20in%20standalone%20mode.png)
+
+Please refer to [mysql-java-broker charts](https://github.com/wsxiaozhang/cf-mysql-java-broker/tree/master/charts/mysql-java-broker) for deployment approach.
+After the broker running in Kubernetes, it can be cluster internally accessed via service url like "http://mysql-java-broker-mysql-java-broker.mysql-java-broker.svc.cluster.local". Actually, a clusterservicebroker object will be created to connect the broker at the time of registering to service catalog. The clusterservicebroker object artifact looks like below.
 
 ```
 apiVersion: servicecatalog.k8s.io/v1beta1
